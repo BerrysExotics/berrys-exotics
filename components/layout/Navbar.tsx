@@ -1,38 +1,63 @@
+"use client";
+
+import Link from "next/link";
 import Image from "next/image";
 
 export default function Navbar() {
   return (
-    <header className="fixed top-0 z-50 w-full border-b border-emerald-900/40 bg-slate-950/80 backdrop-blur">
-      <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
+    <header className="fixed top-0 left-0 w-full z-50 backdrop-blur-md bg-black/40 border-b border-white/10">
+      <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
 
-        <a href="/" className="flex items-center gap-4">
+        <Link href="/" className="flex items-center gap-3">
+
           <Image
             src="/logos/logo.png"
             alt="Berrys Exotics"
-            width={70}
-            height={70}
-            className="rounded-full"
+            width={55}
+            height={55}
+            priority
           />
 
           <div>
-            <h1 className="text-2xl font-bold text-emerald-400">
-              Berrys_Exotics
+            <h1 className="text-white font-bold text-xl">
+              Berrys Exotics
             </h1>
-            <p className="text-xs text-gray-400">
-              Premium New Caledonian Geckos
+
+            <p className="text-green-400 text-sm">
+              Premium Geckos
             </p>
           </div>
-        </a>
 
-        <div className="hidden gap-8 text-sm font-medium md:flex">
-          <a href="/">Home</a>
-          <a href="/available">Available</a>
-          <a href="/collection">Collection</a>
-          <a href="/pairings">Pairings</a>
-          <a href="/contact">Contact</a>
-        </div>
+        </Link>
 
-      </nav>
+        <nav className="hidden md:flex items-center gap-8">
+
+          <Link href="/">
+            Home
+          </Link>
+
+          <Link href="/collection">
+            Collection
+          </Link>
+
+          <Link href="/about">
+            About
+          </Link>
+
+          <Link href="/contact">
+            Contact
+          </Link>
+
+        </nav>
+
+        <Link
+          href="/collection"
+          className="rounded-full bg-green-600 hover:bg-green-500 px-5 py-2 font-semibold transition"
+        >
+          View Geckos
+        </Link>
+
+      </div>
     </header>
   );
 }

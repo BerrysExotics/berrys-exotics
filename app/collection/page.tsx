@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { supabase } from "@/Lib/supabase";
+import { supabase } from "@/lib/supabase";
 
 type Gecko = {
   id: string;
@@ -63,7 +63,7 @@ export default function CollectionPage() {
             >
               {gecko.image && (
                 <img
-                  src={gecko.image}
+                  src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/geckos/${gecko.image}`}
                   alt={gecko.name}
                   className="w-full h-72 object-cover"
                 />
