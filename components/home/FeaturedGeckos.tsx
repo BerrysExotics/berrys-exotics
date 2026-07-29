@@ -1,5 +1,7 @@
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase/client";
+const supabase = createClient();
 import Image from "next/image";
+import Link from "next/link";
 
 export default async function FeaturedGeckos() {
   const { data: geckos, error } = await supabase
@@ -26,9 +28,10 @@ export default async function FeaturedGeckos() {
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {geckos?.map((gecko) => (
-            <div
+            <Link
               key={gecko.id}
-              className="bg-neutral-800 rounded-2xl overflow-hidden shadow-lg hover:scale-105 transition"
+              href={`/collection/${gecko.id}`}
+              className="bg-neutral-800 rounded-2xl overflow-hidden shadow-lg hover:scale-105 transition block"
             >
               <div className="relative h-72">
                 <Image
@@ -40,7 +43,9 @@ export default async function FeaturedGeckos() {
               </div>
 
               <div className="p-6">
-                <h3 className="text-2xl font-bold">{gecko.name}</h3>
+                <h3 className="text-2xl font-bold">
+                  {gecko.name}
+                </h3>
 
                 <p className="text-green-400 mt-1">
                   {gecko.morph}
@@ -55,12 +60,20 @@ export default async function FeaturedGeckos() {
                 </div>
 
                 <div className="mt-5">
-                  <span className="bg-green-600 px-3 py-1 rounded-full text-sm">
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm ${
+                      gecko.status === "Available"
+                        ? "bg-green-600"
+                        : gecko.status === "Hold"
+                        ? "bg-yellow-500 text-black"
+                        : "bg-red-600"
+                    }`}
+                  >
                     {gecko.status}
                   </span>
                 </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>
