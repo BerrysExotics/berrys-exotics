@@ -40,14 +40,11 @@ export default async function GeckoPage({
   );
 
   const imageUrls =
-    images.length > 0
-      ? images.map(
-          (img) =>
-            `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/geckos/${img.image}`
-        )
-      : [
-          `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/geckos/${gecko.image}`,
-        ];
+  images.length > 0
+    ? images.map((img) => img.image)
+    : gecko.image
+      ? [gecko.image]
+      : [];
 
   return (
     <main className="min-h-screen bg-neutral-950 text-white py-16">

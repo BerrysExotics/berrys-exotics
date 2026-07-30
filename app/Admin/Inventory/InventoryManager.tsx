@@ -36,7 +36,9 @@ export default function InventoryManager() {
     try {
       const animals = await getInventory();
 
-      setGeckos(animals);
+console.log("Inventory:", animals);
+
+setGeckos(animals);
     } catch (err) {
       console.error(err);
       alert("Unable to load inventory.");
