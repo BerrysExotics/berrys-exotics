@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-
 import { createClient } from "@/lib/supabase/server";
 
 export async function setCoverImageAction(
@@ -10,7 +9,7 @@ export async function setCoverImageAction(
 ) {
   const supabase = await createClient();
 
-  // Remove the current cover image
+  // Remove current cover
   const { error: clearError } = await supabase
     .from("gecko_images")
     .update({
@@ -22,7 +21,7 @@ export async function setCoverImageAction(
     throw clearError;
   }
 
-  // Set the selected image as cover
+  // Set new cover
   const { error: coverError } = await supabase
     .from("gecko_images")
     .update({
@@ -34,7 +33,7 @@ export async function setCoverImageAction(
     throw coverError;
   }
 
-  // Get the image URL
+  // Get image URL
   const { data: image, error: imageError } = await supabase
     .from("gecko_images")
     .select("image")
@@ -45,7 +44,7 @@ export async function setCoverImageAction(
     throw imageError;
   }
 
-  // Keep the geckos table in sync
+  // Keep geckos table synced
   const { error: geckoError } = await supabase
     .from("geckos")
     .update({
@@ -57,7 +56,6 @@ export async function setCoverImageAction(
     throw geckoError;
   }
 
-  // Refresh affected pages
   revalidatePath("/Admin/inventory");
   revalidatePath(`/Admin/inventory/${geckoId}`);
   revalidatePath(`/Admin/inventory/${geckoId}/gallery`);
@@ -68,66 +66,85 @@ export async function setCoverImageAction(
 export async function promoteToBreederAction(
   geckoId: string
 ) {
+  console.log("========== PROMOTE START ==========");
+  console.log("Incoming Gecko ID:", geckoId);
+
   const supabase = await createClient();
 
-  // Get the gecko
+  // Load gecko
   const { data: gecko, error: geckoError } = await supabase
     .from("geckos")
     .select("*")
     .eq("id", geckoId)
     .single();
 
+  console.log("GECKO:");
+  console.log(gecko);
+  console.log("GECKO ERROR:");
+  console.log(geckoError);
+
   if (geckoError) {
     throw geckoError;
   }
 
-  // Make sure this gecko isn't already a breeder
-  const { data: existing, error: existingError } =
-    await supabase
-      .from("breeders")
-      .select("id")
-      .eq("gecko_id", geckoId)
-      .maybeSingle();
+  // Already promoted?
+  const {
+    data: existing,
+    error: existingError,
+  } = await supabase
+    .from("breeders")
+    .select("id")
+    .eq("gecko_id", geckoId)
+    .maybeSingle();
+
+  console.log("EXISTING BREEDER:");
+  console.log(existing);
+  console.log("EXISTING ERROR:");
+  console.log(existingError);
 
   if (existingError) {
     throw existingError;
   }
 
   if (existing) {
+    console.log("Already exists.");
     return existing;
   }
 
-  // Create linked breeder profile
-  const { data: breeder, error: breederError } =
-    await supabase
-      .from("breeders")
-      .insert({
-        gecko_id: gecko.id,
+  console.log("INSERTING BREEDER...");
 
-        name: gecko.name,
-        species: gecko.species,
-        morph: gecko.morph,
-        sex: gecko.sex,
+  const {
+    data: breeder,
+    error: breederError,
+  } = await supabase
+    .from("breeders")
+    .insert({
+      gecko_id: gecko.id,
+      name: gecko.name,
+      species: gecko.species,
+      morph: gecko.morph,
+      sex: gecko.sex,
+      weight: gecko.weight,
+      hatch_date: gecko.hatch_date,
+      status: "Active",
+      description: gecko.description,
+      featured: gecko.featured,
+      cover_image: gecko.image,
+    })
+    .select()
+    .single();
 
-        weight: gecko.weight,
-        hatch_date: gecko.hatch_date,
-
-        status: "Active",
-
-        description: gecko.description,
-
-        featured: gecko.featured,
-
-        cover_image: gecko.image,
-      })
-      .select()
-      .single();
+  console.log("BREEDER:");
+  console.log(breeder);
+  console.log("BREEDER ERROR:");
+  console.log(breederError);
 
   if (breederError) {
     throw breederError;
   }
 
-  // Update the gecko so it becomes a breeder
+  console.log("UPDATING GECKO STATUS...");
+
   const { error: updateError } = await supabase
     .from("geckos")
     .update({
@@ -136,19 +153,23 @@ export async function promoteToBreederAction(
     })
     .eq("id", geckoId);
 
+  console.log("UPDATE ERROR:");
+  console.log(updateError);
+
   if (updateError) {
     throw updateError;
   }
 
-  // Refresh pages
+  console.log("REVALIDATING...");
+
   revalidatePath("/Admin/inventory");
   revalidatePath(`/Admin/inventory/${geckoId}`);
-
   revalidatePath("/Admin/breeders");
   revalidatePath("/Admin/breeders/manage");
-
   revalidatePath("/collection");
   revalidatePath(`/collection/${geckoId}`);
+
+  console.log("========== PROMOTE COMPLETE ==========");
 
   return breeder;
 }

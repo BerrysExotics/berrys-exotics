@@ -39,28 +39,28 @@ export async function getBreeders(): Promise<BreederListItem[]> {
       )
     `);
 
+  console.log("=================================");
+  console.log("BREEDERS RAW DATA");
+  console.log(JSON.stringify(data, null, 2));
+  console.log("BREEDERS ERROR");
+  console.log(error);
+  console.log("=================================");
+
   if (error) {
     throw error;
   }
 
- console.log("Breeders returned:", data);
-
-return (data ?? [])
-  .filter((breeder: any) => breeder.geckos)
-  .map((breeder: any) => ({
+  return (data ?? [])
+    .filter((breeder: any) => breeder.geckos)
+    .map((breeder: any) => ({
       breederId: breeder.id,
-
       geckoId: breeder.geckos.id,
-
       name: breeder.geckos.name,
       species: breeder.geckos.species,
       morph: breeder.geckos.morph ?? "",
       sex: breeder.geckos.sex,
-
       weight: breeder.geckos.weight,
-
       status: breeder.status,
-
       coverImage:
         breeder.geckos.gecko_images?.find(
           (img: any) => img.is_cover
