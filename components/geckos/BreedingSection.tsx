@@ -1,15 +1,23 @@
 "use client";
 
+import ParentSelector from "@/components/forms/ParentSelector";
+
 import { GeckoFormData } from "@/types/geckoForm";
+import { ParentOption } from "@/lib/geckos/getParentOptions";
 
 interface Props {
   form: GeckoFormData;
-  setForm: React.Dispatch<React.SetStateAction<GeckoFormData>>;
+  setForm: React.Dispatch<
+    React.SetStateAction<GeckoFormData>
+  >;
+
+  parents: ParentOption[];
 }
 
 export default function BreedingSection({
   form,
   setForm,
+  parents,
 }: Props) {
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement>
@@ -23,16 +31,16 @@ export default function BreedingSection({
   }
 
   return (
-    <div className="rounded-2xl bg-neutral-900 border border-neutral-800 p-6 space-y-6">
+    <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6 space-y-6">
 
       <h2 className="text-2xl font-bold text-white">
         Breeding Information
       </h2>
 
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid gap-6 md:grid-cols-2">
 
         <div>
-          <label className="block mb-2 font-semibold text-white">
+          <label className="mb-2 block font-semibold text-white">
             Produced By
           </label>
 
@@ -45,7 +53,7 @@ export default function BreedingSection({
         </div>
 
         <div>
-          <label className="block mb-2 font-semibold text-white">
+          <label className="mb-2 block font-semibold text-white">
             Original Breeder
           </label>
 
@@ -58,7 +66,7 @@ export default function BreedingSection({
         </div>
 
         <div>
-          <label className="block mb-2 font-semibold text-white">
+          <label className="mb-2 block font-semibold text-white">
             Lineage
           </label>
 
@@ -66,38 +74,36 @@ export default function BreedingSection({
             name="lineage"
             value={form.lineage}
             onChange={handleChange}
-            className="w-full rounded-xl bg-neutral-800 p-4 text-white"
             placeholder="Example: GT x Moro"
-          />
-        </div>
-
-        <div>
-          <label className="block mb-2 font-semibold text-white">
-            Sire ID
-          </label>
-
-          <input
-            name="sire_id"
-            value={form.sire_id}
-            onChange={handleChange}
             className="w-full rounded-xl bg-neutral-800 p-4 text-white"
-            placeholder="Parent selector coming next"
           />
         </div>
 
-        <div>
-          <label className="block mb-2 font-semibold text-white">
-            Dam ID
-          </label>
+        <ParentSelector
+          label="Sire"
+          sex="Male"
+          parents={parents}
+          value={form.sire_id}
+          onChange={(value) =>
+            setForm((prev) => ({
+              ...prev,
+              sire_id: value,
+            }))
+          }
+        />
 
-          <input
-            name="dam_id"
-            value={form.dam_id}
-            onChange={handleChange}
-            className="w-full rounded-xl bg-neutral-800 p-4 text-white"
-            placeholder="Parent selector coming next"
-          />
-        </div>
+        <ParentSelector
+          label="Dam"
+          sex="Female"
+          parents={parents}
+          value={form.dam_id}
+          onChange={(value) =>
+            setForm((prev) => ({
+              ...prev,
+              dam_id: value,
+            }))
+          }
+        />
 
       </div>
 

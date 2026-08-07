@@ -9,18 +9,19 @@ export async function createClient() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value;
+        getAll() {
+          return cookieStore.getAll();
         },
 
-        set() {
-          // Cookie writes are only allowed in Server Actions or Route Handlers.
-          // No-op here.
-        },
-
-        remove() {
-          // Cookie writes are only allowed in Server Actions or Route Handlers.
-          // No-op here.
+        setAll(cookiesToSet) {
+          try {
+            cookiesToSet.forEach(({ name, value, options }) => {
+              cookieStore.set(name, value, options);
+            });
+          } catch {
+            // Ignore if called from a Server Component.
+            // Middleware will handle cookie refreshes.
+          }
         },
       },
     }

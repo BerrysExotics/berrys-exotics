@@ -10,6 +10,10 @@ export async function updateGecko(
   const { data: gecko, error } = await supabase
     .from("geckos")
     .update({
+      // Internal ID
+      animal_id: data.animal_id || null,
+
+      // Basic Information
       name: data.name,
       nickname: data.nickname,
 
@@ -20,9 +24,11 @@ export async function updateGecko(
       weight: data.weight === "" ? null : Number(data.weight),
       hatch_date: data.hatch_date || null,
 
+      // Pricing
       price: data.price === "" ? null : Number(data.price),
       deposit: data.deposit === "" ? 0 : Number(data.deposit),
 
+      // Status
       status: data.status,
       availability: data.availability,
 
@@ -30,6 +36,7 @@ export async function updateGecko(
       listed: data.listed,
       pet_only: data.pet_only,
 
+      // Breeding
       lineage: data.lineage || null,
       breeder: data.breeder || null,
       produced_by: data.produced_by || null,
@@ -37,6 +44,7 @@ export async function updateGecko(
       sire_id: data.sire_id || null,
       dam_id: data.dam_id || null,
 
+      // Notes
       description: data.description,
     })
     .eq("id", id)

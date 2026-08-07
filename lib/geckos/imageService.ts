@@ -27,13 +27,12 @@ export async function getImages(geckoId: string): Promise<GeckoImageItem[]> {
   if (error) throw error;
 
   return (data ?? []).map((image) => ({
-    id: image.id,
-    image: image.image,
-    existing: true,
-    isCover: image.is_cover,
-  }));
+  id: image.id,
+  image: image.image,
+  existing: true,
+  isCover: image.is_cover,
+}));
 }
-
 export async function uploadNewImages(geckoId: string, images: GeckoImageItem[]) {
   const supabase = createClient();
 

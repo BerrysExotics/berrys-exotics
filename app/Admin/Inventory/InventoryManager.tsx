@@ -35,13 +35,10 @@ export default function InventoryManager() {
 
     try {
       const animals = await getInventory();
-
-console.log("Inventory:", animals);
-
-setGeckos(animals);
+      setGeckos(animals);
     } catch (err) {
       console.error(err);
-      alert("Unable to load inventory.");
+      alert("Unable to load collection.");
     } finally {
       setLoading(false);
     }
@@ -65,15 +62,87 @@ setGeckos(animals);
     loadInventory();
   }
 
+  async function deleteGecko(
+    gecko: InventoryGecko
+  ) {
+    const confirmed = window.confirm(
+      `Delete "${gecko.name}" permanently?\n\nThis will delete all photos as well.`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      // Gallery images
+      const { data: gallery, error: galleryError } =
+        await supabase
+          .from("gecko_images")
+          .select("image")
+          .eq("gecko_id", gecko.id);
+
+      if (galleryError) throw galleryError;
+
+      const files =
+        gallery
+          ?.map((img) => img.image)
+          .filter(Boolean) ?? [];
+
+      if (files.length) {
+        const storageDelete =
+          await supabase.storage
+            .from("geckos")
+            .remove(files);
+
+        if (storageDelete.error)
+          throw storageDelete.error;
+      }
+
+      const galleryDelete = await supabase
+        .from("gecko_images")
+        .delete()
+        .eq("gecko_id", gecko.id);
+
+      if (galleryDelete.error)
+        throw galleryDelete.error;
+
+      const geckoDelete = await supabase
+        .from("geckos")
+        .delete()
+        .eq("id", gecko.id);
+
+      if (geckoDelete.error)
+        throw geckoDelete.error;
+
+      await loadInventory();
+
+      alert(`${gecko.name} deleted successfully.`);
+    } catch (err) {
+      console.error(err);
+
+      if (err instanceof Error) {
+        alert(err.message);
+      } else {
+        alert("Unable to delete gecko.");
+      }
+    }
+  }
+
   const filtered = useMemo(() => {
     return geckos.filter((gecko) => {
+      const searchText = search.toLowerCase();
+
       const matchesSearch =
-        gecko.name
+        (gecko.name ?? "")
           .toLowerCase()
-          .includes(search.toLowerCase()) ||
-        gecko.morph
+          .includes(searchText) ||
+        (gecko.morph ?? "")
           .toLowerCase()
-          .includes(search.toLowerCase());
+          .includes(searchText) ||
+        (gecko.animal_id ?? "")
+          .toLowerCase()
+          .includes(searchText) ||
+        (gecko.species ?? "")
+          .toLowerCase()
+          .includes(searchText);
 
       const matchesSpecies =
         species === "All" ||
@@ -99,33 +168,31 @@ setGeckos(animals);
   if (loading) {
     return (
       <div className="py-16 text-center text-xl text-white">
-        Loading inventory...
+        Loading My Collection...
       </div>
     );
   }
+
+  const availableCount = geckos.filter(
+    (g) => g.availability === "Available"
+  ).length;
+
+  const soldCount = geckos.filter(
+    (g) => g.availability === "Sold"
+  ).length;
+
+  const featuredCount = geckos.filter(
+    (g) => g.featured
+  ).length;
 
   return (
     <div className="space-y-8">
 
       <InventoryStats
         total={geckos.length}
-        available={
-          geckos.filter(
-            (g) =>
-              g.availability === "Available"
-          ).length
-        }
-        sold={
-          geckos.filter(
-            (g) =>
-              g.availability === "Sold"
-          ).length
-        }
-        featured={
-          geckos.filter(
-            (g) => g.featured
-          ).length
-        }
+        available={availableCount}
+        sold={soldCount}
+        featured={featuredCount}
       />
 
       <InventoryToolbar
@@ -134,19 +201,31 @@ setGeckos(animals);
         species={species}
         setSpecies={setSpecies}
         availability={availability}
-        setAvailability={
-          setAvailability
-        }
+        setAvailability={setAvailability}
       />
 
-      <div className="space-y-6">
+      {filtered.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-neutral-700 bg-neutral-900 p-16 text-center">
 
-        {filtered.length === 0 ? (
-          <p className="text-center text-gray-400">
-            No geckos found.
+          <div className="text-7xl">
+            🦎
+          </div>
+
+          <h2 className="mt-6 text-3xl font-black text-white">
+            Your Collection is Empty
+          </h2>
+
+          <p className="mx-auto mt-4 max-w-2xl text-lg leading-8 text-neutral-400">
+            Start building your collection by adding your
+            first gecko. Every gecko you own begins here
+            before becoming a breeder, holdback, or
+            available animal.
           </p>
-        ) : (
-          filtered.map((gecko) => (
+
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {filtered.map((gecko) => (
             <InventoryCard
               key={gecko.id}
               gecko={gecko}
@@ -154,15 +233,12 @@ setGeckos(animals);
                 toggleFeatured(gecko)
               }
               onDelete={() =>
-                alert(
-                  "Delete is the next feature we'll build."
-                )
+                deleteGecko(gecko)
               }
             />
-          ))
-        )}
-
-      </div>
+          ))}
+        </div>
+      )}
 
     </div>
   );

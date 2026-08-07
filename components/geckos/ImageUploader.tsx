@@ -1,7 +1,9 @@
 "use client";
 
-import { useMemo, useRef } from "react";
+import { useMemo } from "react";
 
+import ImageDropzone from "./ImageDropzone";
+import ImageCard from "./ImageCard";
 import { GeckoImageItem } from "@/types/geckoImage";
 
 type ImageUploaderProps = {
@@ -13,18 +15,16 @@ export default function ImageUploader({
   images,
   setImages,
 }: ImageUploaderProps) {
-  const inputRef = useRef<HTMLInputElement>(null);
-
   function handleFileSelect(fileList: FileList | null) {
     if (!fileList) return;
 
    const newImages: GeckoImageItem[] = Array.from(fileList).map(
   (file, index) => ({
+    id: crypto.randomUUID(),
     file,
     image: "",
     existing: false,
-    isCover:
-      images.length === 0 && index === 0,
+    isCover: images.length === 0 && index === 0,
   })
 );
 
@@ -68,61 +68,18 @@ export default function ImageUploader({
   }, [images]);
     return (
     <div className="space-y-6">
-      <div
-        onClick={() => inputRef.current?.click()}
-        className="cursor-pointer rounded-xl border-2 border-dashed border-green-600 p-10 text-center transition hover:bg-neutral-900"
-      >
-        <h2 className="text-2xl font-bold text-white">
-          Upload Gecko Images
-        </h2>
-
-        <p className="mt-2 text-gray-400">
-          Click here to select one or more photos
-        </p>
-
-        <input
-          ref={inputRef}
-          hidden
-          multiple
-          accept="image/*"
-          type="file"
-          onChange={(e) => handleFileSelect(e.target.files)}
-        />
-      </div>
+      <ImageDropzone onFilesSelected={handleFileSelect} />
 
       {images.length > 0 && (
         <div className="grid gap-6 md:grid-cols-3">
           {images.map((image, index) => (
-            <div
-              key={index}
-              className="overflow-hidden rounded-xl bg-neutral-900"
-            >
-              <img
-                src={previews[index]}
-                alt={`Gecko ${index + 1}`}
-                className="h-52 w-full object-cover"
-              />
-
-              <div className="space-y-3 p-4">
-                <label className="flex items-center gap-2 text-white">
-                  <input
-                    type="radio"
-                    checked={image.isCover}
-                    onChange={() => makeCover(index)}
-                  />
-
-                  Cover Image
-                </label>
-
-                <button
-                  type="button"
-                  onClick={() => removeImage(index)}
-                  className="w-full rounded-lg bg-red-600 py-2 font-semibold text-white hover:bg-red-700"
-                >
-                  Remove Image
-                </button>
-              </div>
-            </div>
+            <ImageCard
+              key={image.id}
+              image={image}
+              preview={previews[index] ?? ""}
+              onMakeCover={() => makeCover(index)}
+              onRemove={() => removeImage(index)}
+            />
           ))}
         </div>
       )}

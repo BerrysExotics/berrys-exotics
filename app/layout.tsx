@@ -1,10 +1,45 @@
 import "./globals.css";
-import type { Metadata } from "next";
-import Navbar from "@/components/layout/Navbar";
+import type { Metadata, Viewport } from "next";
 
 export const metadata: Metadata = {
-  title: "Berrys Exotics",
-  description: "Premium Captive-Bred New Caledonian Geckos",
+  title: {
+    default: "Berrys_Exotics",
+    template: "%s | Berrys_Exotics",
+  },
+  description:
+    "Premium captive-bred Crested and Leachianus geckos. Quality genetics, ethical breeding, and exceptional customer support.",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Berrys_Exotics",
+  },
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      {
+        url: "/icons/icon-192.png",
+        sizes: "192x192",
+        type: "image/png",
+      },
+      {
+        url: "/icons/icon-512.png",
+        sizes: "512x512",
+        type: "image/png",
+      },
+    ],
+    apple: [
+      {
+        url: "/icons/apple-touch-icon.png",
+        sizes: "180x180",
+      },
+    ],
+    shortcut: "/favicon.ico",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#16a34a",
 };
 
 export default function RootLayout({
@@ -15,11 +50,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="bg-neutral-950 text-white">
-        <Navbar />
-
-        <main className="pt-24">
-          {children}
-        </main>
+        {children}
       </body>
     </html>
   );

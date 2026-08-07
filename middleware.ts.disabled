@@ -1,0 +1,29 @@
+import { NextResponse, type NextRequest } from "next/server";
+
+export function middleware(request: NextRequest) {
+  const path = request.nextUrl.pathname;
+
+  // Allow the login page
+  if (path === "/Admin/login") {
+    return NextResponse.next();
+  }
+
+  // Protect everything under /Admin
+  if (path.startsWith("/Admin")) {
+    const token =
+      request.cookies.get("sb-access-token") ||
+      request.cookies.get("sb-refresh-token");
+
+    if (!token) {
+      return NextResponse.redirect(
+        new URL("/Admin/login", request.url)
+      );
+    }
+  }
+
+  return NextResponse.next();
+}
+
+export const config = {
+  matcher: ["/Admin/:path*"],
+};

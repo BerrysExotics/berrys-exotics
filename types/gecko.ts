@@ -1,6 +1,10 @@
 export interface Gecko {
   id: string;
 
+  // Internal ID
+  animal_id: string | null;
+
+  // Basic Information
   name: string;
   nickname: string | null;
 
@@ -11,9 +15,11 @@ export interface Gecko {
   weight: number | null;
   hatch_date: string | null;
 
+  // Pricing
   price: number | null;
   deposit: number;
 
+  // Status
   status: string;
   availability: string;
 
@@ -21,6 +27,7 @@ export interface Gecko {
   listed: boolean;
   pet_only: boolean;
 
+  // Breeding
   lineage: string | null;
   breeder: string | null;
   produced_by: string | null;
@@ -28,8 +35,10 @@ export interface Gecko {
   sire_id: string | null;
   dam_id: string | null;
 
+  // Notes
   description: string;
 
+  // Main Image
   image: string | null;
 
   created_at: string;
