@@ -3,6 +3,9 @@ import { createClient } from "@/lib/supabase/client";
 export interface InventoryGecko {
   id: string;
 
+  // Internal ID
+  animal_id: string | null;
+
   name: string;
   nickname: string | null;
 
@@ -13,6 +16,9 @@ export interface InventoryGecko {
   weight: number | null;
 
   price: number | null;
+
+  // NEW
+  status: string;
 
   availability: string;
 
@@ -28,7 +34,8 @@ export async function getInventory(): Promise<InventoryGecko[]> {
   const { data: geckos, error: geckoError } = await supabase
     .from("geckos")
     .select("*")
-    .order("name");
+    .order("animal_id", { ascending: true })
+    .order("name", { ascending: true });
 
   if (geckoError) {
     throw geckoError;
@@ -44,16 +51,16 @@ export async function getInventory(): Promise<InventoryGecko[]> {
     throw imageError;
   }
 
-  // Build a lookup table
   const imageMap = new Map<string, string>();
 
   images?.forEach((image) => {
     imageMap.set(image.gecko_id, image.image);
   });
 
-  // Merge the data
   return (geckos ?? []).map((gecko) => ({
     id: gecko.id,
+
+    animal_id: gecko.animal_id,
 
     name: gecko.name,
     nickname: gecko.nickname,
@@ -65,6 +72,9 @@ export async function getInventory(): Promise<InventoryGecko[]> {
     weight: gecko.weight,
 
     price: gecko.price,
+
+    // NEW
+    status: gecko.status,
 
     availability: gecko.availability,
 

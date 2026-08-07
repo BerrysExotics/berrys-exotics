@@ -98,6 +98,8 @@ console.log("Loaded geckos:", data);
     }
   });
 
+console.log("Files to delete:", Array.from(files));
+
   // Delete storage files
   if (files.size > 0) {
     await supabase.storage

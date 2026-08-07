@@ -23,16 +23,38 @@ export default function BasicInfoSection({
   }
 
   return (
-    <div className="rounded-2xl bg-neutral-900 border border-neutral-800 p-6 space-y-6">
+    <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6 space-y-6">
 
       <h2 className="text-2xl font-bold text-white">
         Basic Information
       </h2>
 
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid gap-6 md:grid-cols-2">
+
+        {/* Animal ID */}
 
         <div>
-          <label className="block mb-2 font-semibold text-white">
+          <label className="mb-2 block font-semibold text-white">
+            Animal ID
+          </label>
+
+          <input
+            name="animal_id"
+            value={form.animal_id ?? ""}
+            onChange={handleChange}
+            placeholder="A-01"
+            className="w-full rounded-xl bg-neutral-800 p-4 text-white"
+          />
+
+          <p className="mt-2 text-sm text-neutral-400">
+            Your internal ID (A-01, A-02, B-14, etc.)
+          </p>
+        </div>
+
+        {/* Gecko Name */}
+
+        <div>
+          <label className="mb-2 block font-semibold text-white">
             Gecko Name
           </label>
 
@@ -44,8 +66,10 @@ export default function BasicInfoSection({
           />
         </div>
 
+        {/* Nickname */}
+
         <div>
-          <label className="block mb-2 font-semibold text-white">
+          <label className="mb-2 block font-semibold text-white">
             Nickname
           </label>
 
@@ -53,13 +77,15 @@ export default function BasicInfoSection({
             name="nickname"
             value={form.nickname}
             onChange={handleChange}
-            className="w-full rounded-xl bg-neutral-800 p-4 text-white"
             placeholder="Optional"
+            className="w-full rounded-xl bg-neutral-800 p-4 text-white"
           />
         </div>
 
+        {/* Species */}
+
         <div>
-          <label className="block mb-2 font-semibold text-white">
+          <label className="mb-2 block font-semibold text-white">
             Species
           </label>
 
@@ -74,8 +100,10 @@ export default function BasicInfoSection({
           </select>
         </div>
 
+        {/* Morph */}
+
         <div>
-          <label className="block mb-2 font-semibold text-white">
+          <label className="mb-2 block font-semibold text-white">
             Morph
           </label>
 
@@ -87,8 +115,10 @@ export default function BasicInfoSection({
           />
         </div>
 
+        {/* Sex */}
+
         <div>
-          <label className="block mb-2 font-semibold text-white">
+          <label className="mb-2 block font-semibold text-white">
             Sex
           </label>
 
@@ -106,8 +136,10 @@ export default function BasicInfoSection({
           </select>
         </div>
 
+        {/* Weight */}
+
         <div>
-          <label className="block mb-2 font-semibold text-white">
+          <label className="mb-2 block font-semibold text-white">
             Weight (g)
           </label>
 
@@ -120,8 +152,10 @@ export default function BasicInfoSection({
           />
         </div>
 
+        {/* Hatch Date */}
+
         <div>
-          <label className="block mb-2 font-semibold text-white">
+          <label className="mb-2 block font-semibold text-white">
             Hatch Date
           </label>
 
