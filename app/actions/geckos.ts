@@ -66,9 +66,6 @@ export async function setCoverImageAction(
 export async function promoteToBreederAction(
   geckoId: string
 ) {
-  console.log("========== PROMOTE START ==========");
-  console.log("Incoming Gecko ID:", geckoId);
-
   const supabase = await createClient();
 
   // Load gecko
@@ -77,11 +74,6 @@ export async function promoteToBreederAction(
     .select("*")
     .eq("id", geckoId)
     .single();
-
-  console.log("GECKO:");
-  console.log(gecko);
-  console.log("GECKO ERROR:");
-  console.log(geckoError);
 
   if (geckoError) {
     throw geckoError;
@@ -97,53 +89,40 @@ export async function promoteToBreederAction(
     .eq("gecko_id", geckoId)
     .maybeSingle();
 
-  console.log("EXISTING BREEDER:");
-  console.log(existing);
-  console.log("EXISTING ERROR:");
-  console.log(existingError);
-
   if (existingError) {
     throw existingError;
   }
 
-  if (existing) {
-    console.log("Already exists.");
-    return existing;
+  let breeder = existing;
+
+  if (!existing) {
+    const {
+      data: newBreeder,
+      error: breederError,
+    } = await supabase
+      .from("breeders")
+      .insert({
+        gecko_id: gecko.id,
+        name: gecko.name,
+        species: gecko.species,
+        morph: gecko.morph,
+        sex: gecko.sex,
+        weight: gecko.weight,
+        hatch_date: gecko.hatch_date,
+        status: "Active",
+        description: gecko.description,
+        featured: gecko.featured,
+        cover_image: gecko.image,
+      })
+      .select()
+      .single();
+
+    if (breederError) {
+      throw breederError;
+    }
+
+    breeder = newBreeder;
   }
-
-  console.log("INSERTING BREEDER...");
-
-  const {
-    data: breeder,
-    error: breederError,
-  } = await supabase
-    .from("breeders")
-    .insert({
-      gecko_id: gecko.id,
-      name: gecko.name,
-      species: gecko.species,
-      morph: gecko.morph,
-      sex: gecko.sex,
-      weight: gecko.weight,
-      hatch_date: gecko.hatch_date,
-      status: "Active",
-      description: gecko.description,
-      featured: gecko.featured,
-      cover_image: gecko.image,
-    })
-    .select()
-    .single();
-
-  console.log("BREEDER:");
-  console.log(breeder);
-  console.log("BREEDER ERROR:");
-  console.log(breederError);
-
-  if (breederError) {
-    throw breederError;
-  }
-
-  console.log("UPDATING GECKO STATUS...");
 
   const { error: updateError } = await supabase
     .from("geckos")
@@ -153,14 +132,9 @@ export async function promoteToBreederAction(
     })
     .eq("id", geckoId);
 
-  console.log("UPDATE ERROR:");
-  console.log(updateError);
-
   if (updateError) {
     throw updateError;
   }
-
-  console.log("REVALIDATING...");
 
   revalidatePath("/Admin/inventory");
   revalidatePath(`/Admin/inventory/${geckoId}`);
@@ -168,8 +142,6 @@ export async function promoteToBreederAction(
   revalidatePath("/Admin/breeders/manage");
   revalidatePath("/collection");
   revalidatePath(`/collection/${geckoId}`);
-
-  console.log("========== PROMOTE COMPLETE ==========");
 
   return breeder;
 }
