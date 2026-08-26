@@ -53,6 +53,9 @@ export default function CollectionToolbar({
           <option value="All">All Species</option>
           <option value="Crested">Crested</option>
           <option value="Leachianus">Leachianus</option>
+          <option value="Chahoua">Chahoua</option>
+          <option value="Gargoyle">Gargoyle</option>
+          <option value="Other">Other</option>
         </select>
 
         <select
