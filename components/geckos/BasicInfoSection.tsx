@@ -97,6 +97,9 @@ export default function BasicInfoSection({
           >
             <option>Crested Gecko</option>
             <option>Leachianus</option>
+            <option>Chahoua</option>
+            <option>Gargoyle</option>
+            <option>Other</option>
           </select>
         </div>
 
