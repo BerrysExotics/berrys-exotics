@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 const supabase = createClient();
@@ -16,10 +17,13 @@ type AuctionGecko = {
 };
 
 export default function CreateAuctionPage() {
+  const router = useRouter();
+
   const [geckos, setGeckos] = useState<AuctionGecko[]>([]);
   const [selectedGeckoId, setSelectedGeckoId] = useState("");
 
   const [loadingGeckos, setLoadingGeckos] = useState(true);
+  const [creating, setCreating] = useState(false);
 
   const [title, setTitle] = useState("");
   const [startingBid, setStartingBid] = useState("");
@@ -34,9 +38,7 @@ export default function CreateAuctionPage() {
 
       const { data, error } = await supabase
         .from("geckos")
-        .select(
-          "id, name, species, morph, sex, weight"
-        )
+        .select("id, name, species, morph, sex, weight")
         .order("name");
 
       if (error) {
@@ -59,7 +61,83 @@ export default function CreateAuctionPage() {
     title.trim() !== "" &&
     startingBid !== "" &&
     bidIncrement !== "" &&
-    selectedGeckoId !== "";
+    selectedGeckoId !== "" &&
+    Number(startingBid) >= 0 &&
+    Number(bidIncrement) > 0 &&
+    startType === "now";
+
+  function getDurationLabel() {
+    switch (duration) {
+      case "1":
+        return "1 Hour";
+      case "2":
+        return "2 Hours";
+      case "6":
+        return "6 Hours";
+      case "12":
+        return "12 Hours";
+      case "24":
+        return "24 Hours";
+      case "48":
+        return "2 Days";
+      case "72":
+        return "3 Days";
+      case "120":
+        return "5 Days";
+      case "168":
+        return "7 Days";
+      default:
+        return "24 Hours";
+    }
+  }
+
+  async function handleCreateAuction() {
+    if (!canCreate || creating) {
+      return;
+    }
+
+    setCreating(true);
+
+    try {
+      const startTime = new Date();
+
+      const durationHours = Number(duration);
+
+      const endTime = new Date(
+        startTime.getTime() + durationHours * 60 * 60 * 1000
+      );
+
+      const { error } = await supabase.from("auctions").insert({
+        title: title.trim(),
+        gecko_id: selectedGeckoId,
+        starting_bid: Number(startingBid),
+        minimum_bid_increment: Number(bidIncrement),
+        start_time: startTime.toISOString(),
+        end_time: endTime.toISOString(),
+        status: "active",
+        description: description.trim() || null,
+      });
+
+      if (error) {
+        console.error("Error creating auction:", error);
+        alert(`Could not create auction:\n\n${error.message}`);
+        return;
+      }
+
+      alert("Auction created successfully!");
+
+      router.push("/Admin/auctions");
+      router.refresh();
+    } catch (error) {
+      console.error("Unexpected auction creation error:", error);
+
+      alert(
+        "Something unexpected happened while creating the auction."
+      );
+    } finally {
+      setCreating(false);
+    }
+  }
 
   return (
     <main className="min-h-screen bg-neutral-950 px-6 py-16 text-white">
@@ -211,6 +289,13 @@ export default function CreateAuctionPage() {
                     Schedule Start
                   </option>
                 </select>
+
+                {startType === "scheduled" && (
+                  <p className="mt-2 text-sm text-yellow-400">
+                    Scheduled auctions are not available yet.
+                    Please select Start Immediately for now.
+                  </p>
+                )}
               </div>
 
             </div>
@@ -333,6 +418,7 @@ export default function CreateAuctionPage() {
                 </div>
               </div>
             )}
+
           </section>
 
           {/* Description */}
@@ -403,23 +489,19 @@ export default function CreateAuctionPage() {
                   </p>
 
                   <p className="font-semibold">
-                    {duration === "1"
-                      ? "1 Hour"
-                      : duration === "2"
-                      ? "2 Hours"
-                      : duration === "6"
-                      ? "6 Hours"
-                      : duration === "12"
-                      ? "12 Hours"
-                      : duration === "24"
-                      ? "24 Hours"
-                      : duration === "48"
-                      ? "2 Days"
-                      : duration === "72"
-                      ? "3 Days"
-                      : duration === "120"
-                      ? "5 Days"
-                      : "7 Days"}
+                    {getDurationLabel()}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-sm text-neutral-400">
+                    Start
+                  </p>
+
+                  <p className="font-semibold">
+                    {startType === "now"
+                      ? "Immediately"
+                      : "Scheduled"}
                   </p>
                 </div>
 
@@ -440,10 +522,13 @@ export default function CreateAuctionPage() {
 
             <button
               type="button"
-              disabled={!canCreate}
+              onClick={handleCreateAuction}
+              disabled={!canCreate || creating}
               className="rounded-xl bg-emerald-600 px-6 py-3 font-bold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Create Auction
+              {creating
+                ? "Creating Auction..."
+                : "Create Auction"}
             </button>
 
           </div>
