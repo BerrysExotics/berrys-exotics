@@ -10,6 +10,7 @@ export default function Navbar() {
   const links = [
     { href: "/", label: "Home" },
     { href: "/collection", label: "Available" },
+    { href: "/auctions", label: "Auctions" },
     { href: "/breeders", label: "Breeders" },
     { href: "/about", label: "About" },
     { href: "/policy", label: "Policy" },
