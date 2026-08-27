@@ -25,6 +25,16 @@ const sections = [
   },
 
   {
+    title: "Auctions",
+    links: [
+      {
+        name: "Auctions",
+        href: "/Admin/auctions",
+      },
+    ],
+  },
+
+  {
     title: "Breeding",
     links: [
       {
