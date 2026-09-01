@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
-export default function AuctionsPage() {
+export default function AuctionPage() {
   redirect("/");
 }
